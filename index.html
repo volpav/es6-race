@@ -3,6 +3,7 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="css/reset.css" />
+		<link rel="stylesheet" href="css/fonts.css" />
 		<link rel="stylesheet" href="css/main.css" />
 	</head>
 
@@ -13,13 +14,40 @@
 		</div>
 		
 		<script src="scripts/race-track.js"></script>
-		<script src="scripts/game.js"></script>
+		<!-- <script src="scripts/game.js"></script>
 		<script src="scripts/race.js"></script>
 		<script src="scripts/player.js"></script>
-		<script src="scripts/players/sample-player.js"></script>
+		<script src="scripts/players/sample-player.js"></script> -->
 
 		<script type="text/javascript">
-			var raceTrack = new RaceTrack();
+			'use strict';
+
+			var raceTrack = new RaceTrack(),
+					trackMatrix = [];
+
+			for (let i = 0; i < 20; i++) {
+				updateTrackRow();
+			}
+
+			var testRTInterval = setInterval(updateTrackRow, 200);
+
+			function updateTrackRow() {
+				let trackRowArr = [];
+
+				for (let i = 0; i < 10; i++) {
+					let currColVal = (Math.random() > 0.75) ? 'x' : '';
+
+					trackRowArr.push(currColVal);
+				}
+
+				trackMatrix.unshift(trackRowArr);
+
+				if (trackMatrix.length > 20) {
+					trackMatrix.pop();
+				}
+
+				raceTrack.update(trackMatrix);
+			}
 		</script>
 	</body>
 </html>
