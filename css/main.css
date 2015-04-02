@@ -1,0 +1,36 @@
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+h1 {
+  font-size: 2em;
+}
+
+.track-row {
+  overflow: hidden;
+}
+
+.track-row:nth-child(odd) > .track-col:nth-child(odd) {
+  background-color: #e6e6e6;
+}
+
+.track-row:nth-child(odd) > .track-col:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.track-row:nth-child(even) > .track-col:nth-child(odd) {
+  background-color: #f2f2f2;
+}
+
+.track-row:nth-child(even) > .track-col:nth-child(even) {
+  background-color: #e6e6e6;
+}
+
+.track-col {
+  float: left;
+  width: 20px;
+  height: 20px;
+}
