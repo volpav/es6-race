@@ -1,6 +1,14 @@
+'use strict';
+
+/**
+ * Represents a game.
+ */
 class Game {
     var _current;
 
+    /**
+     * Creates new race.
+     */
     createRace(player1, player2) {
         var race = new Race();
 
@@ -10,6 +18,9 @@ class Game {
         return race;
     }
 
+    /**
+     * Returns the current instance of the game.
+     */
     static get *current() {
         if (!_current) {
             _current = new Game();
