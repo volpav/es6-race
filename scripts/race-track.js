@@ -47,8 +47,14 @@ class RaceTrack {
     let className = '';
 
     switch (val) {
-      case 'x':
+      case '*':
         className = 'icon-shield';
+        break;
+      case 'x':
+        className = 'icon-cool';
+        break;
+      case 'y':
+        className = 'icon-evil';
         break;
     }
 

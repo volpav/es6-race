@@ -26,7 +26,13 @@
 					trackMatrix = [];
 
 			for (let i = 0; i < 20; i++) {
-				updateTrackRow();
+				let trackRowArr = [];
+
+				for (let j = 0; j < 10; j++) {
+					trackRowArr.push('');
+				}
+
+				trackMatrix.push(trackRowArr);
 			}
 
 			var testRTInterval = setInterval(updateTrackRow, 200);
@@ -35,7 +41,7 @@
 				let trackRowArr = [];
 
 				for (let i = 0; i < 10; i++) {
-					let currColVal = (Math.random() > 0.75) ? 'x' : '';
+					let currColVal = (Math.random() > 0.75) ? '*' : '';
 
 					trackRowArr.push(currColVal);
 				}
@@ -45,6 +51,10 @@
 				if (trackMatrix.length > 20) {
 					trackMatrix.pop();
 				}
+
+				let lastRow = trackMatrix[trackMatrix.length - 1];
+				lastRow[3] = 'x';
+				lastRow[6] = 'y';
 
 				raceTrack.update(trackMatrix);
 			}
