@@ -13,7 +13,9 @@ class Race extends EventEmitter {
     constructor(player1 = null, player2 = null) {
         this.player1 = player1;
         this.player2 = player2;
+
         this.trackRefreshRate = 500;
+        this.obstacleDensity = 0.08;
 
         this._trackEventTrace = [];
         this._hasStarted = false;
@@ -314,7 +316,7 @@ class Race extends EventEmitter {
 
             /* Generating the line and optionally, obstacles. */
             return Array.from(Array(this.trackSize.width).keys()).map(() => {
-                return !previousContainsObstacles ? (Math.random() > 0.95 ? '*' : ' ') : ' ';
+                return !previousContainsObstacles ? (Math.random() > (1 - this.obstacleDensity) ? '*' : ' ') : ' ';
             })
         };
 

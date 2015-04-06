@@ -2,21 +2,29 @@
 
 <html>
 	<head>
+		<link rel="stylesheet" href="css/reset.css" />
+		<link rel="stylesheet" href="css/fonts.css" />
 		<link rel="stylesheet" href="css/main.css" />
 	</head>
 
 	<body>
+		<div class="container">
+			<h1>ES6 Race</h1>
+			<div id="race-track" class="race-track"></div>
+		</div>
+
 		<script type="application/javascript;version=1.7" src="scripts/stream.js"></script>
+		<script type="application/javascript;version=1.7" src="scripts/race-track.js"></script>
 		<script type="application/javascript;version=1.7" src="scripts/race.js"></script>
 		<script type="application/javascript;version=1.7" src="scripts/player.js"></script>
 		<script type="application/javascript;version=1.7" src="scripts/players/sample-player.js"></script>
 
 		<script type="application/javascript;version=1.7">
+			'use strict';
+
 			/* FIXME: Debugging the sample race. */
 			window.onload = function () {
-			    let pre = document.createElement('pre');
-
-			    document.body.appendChild(pre);
+				let track = new RaceTrack();
 
 			    /* Creating two sample players. */
 
@@ -42,21 +50,11 @@
 
 			    	console.log('Render track.');
 			    		
-		    		let content = '';
-
-		    		trackView.trackData.forEach(row => {
-		    			row.forEach(cell => {
-							content += cell;
-		    			});
-
-		    			content += '<br />';
-		    		});
-
-		    		pre.innerHTML = content;
+			    	track.update(trackView.trackData);
 			    });
 
-			    race.on('start', () => { console.log('race started.'); });
-			    race.on('stop', () => { console.log('race stopped.'); });
+			    race.on('start', () => { console.log('Race started.'); });
+			    race.on('stop', () => { console.log('Race stopped.'); });
 
 			    /* Starting the race. */
 			    race.start();
