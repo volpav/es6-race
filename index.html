@@ -6,11 +6,61 @@
 	</head>
 
 	<body>
-		hello
-		
-		<script src="scripts/game.js"></script>
-		<script src="scripts/race.js"></script>
-		<script src="scripts/player.js"></script>
-		<script src="scripts/players/sample-player.js"></script>
+		<script type="application/javascript;version=1.7" src="scripts/stream.js"></script>
+		<script type="application/javascript;version=1.7" src="scripts/race.js"></script>
+		<script type="application/javascript;version=1.7" src="scripts/player.js"></script>
+		<script type="application/javascript;version=1.7" src="scripts/players/sample-player.js"></script>
+
+		<script type="application/javascript;version=1.7">
+			/* FIXME: Debugging the sample race. */
+			window.onload = function () {
+			    let pre = document.createElement('pre');
+
+			    document.body.appendChild(pre);
+
+			    /* Creating two sample players. */
+
+			    let player1 = new SamplePlayer();
+			    let player2 = new SamplePlayer();
+
+			    /* Creating new race. */
+			    let race = new Race(player1, player2);
+
+			    /* Acquiring race progress and refreshing the track view. */
+			    race.on('progress', trackView => {
+			    	trackView.events.forEach(evt => {
+			    		console.log('Race event: ' + evt.type + ' ' + JSON.stringify(evt.data));
+			    	});
+			    	
+			    	let winners = trackView.events
+			    		.filter(evt => evt.type === 'winner')
+			    		.map(evt => evt.data);
+
+			    	if (winners.length) {
+			    		console.log('Winners: ' + JSON.stringify(winners));
+			    	}
+
+			    	console.log('Render track.');
+			    		
+		    		let content = '';
+
+		    		trackView.trackData.forEach(row => {
+		    			row.forEach(cell => {
+							content += cell;
+		    			});
+
+		    			content += '<br />';
+		    		});
+
+		    		pre.innerHTML = content;
+			    });
+
+			    race.on('start', () => { console.log('race started.'); });
+			    race.on('stop', () => { console.log('race stopped.'); });
+
+			    /* Starting the race. */
+			    race.start();
+			};
+		</script>
 	</body>
 </html>

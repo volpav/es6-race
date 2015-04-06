@@ -5,16 +5,19 @@
  */
 class Player {
     /**
+     * Initializes a new instance of an object.
+     */
+    constructor() { }
+    
+    /**
      * Gets the name of this player.
      * @returns {string} The name of this player.
      */
     get name() { return 'Player'; }
 
     /**
-     * Gets the path of this player in a race.
-     * @param {Race} race A current race.
+     * Returns player's move.
+     * @param {object} track A track sight for the given player.
      */
-    get *path(race) {
-        throw new Error('Not implemented.');
-    } 
+    move (track) { throw new Error('Not implemented.'); }
 }
