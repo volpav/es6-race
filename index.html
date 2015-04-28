@@ -13,52 +13,25 @@
 			<div id="race-track" class="race-track"></div>
 		</div>
 
+		<textarea id="player-test-source"></textarea>
+		<button id="player-test-button">Test player</button>
+
 		<script type="application/javascript;version=1.7" src="scripts/stream.js"></script>
+		<script type="application/javascript;version=1.7" src="scripts/loader.js"></script>
 		<script type="application/javascript;version=1.7" src="scripts/race-track.js"></script>
 		<script type="application/javascript;version=1.7" src="scripts/race.js"></script>
 		<script type="application/javascript;version=1.7" src="scripts/player.js"></script>
 		<script type="application/javascript;version=1.7" src="scripts/players/sample-player.js"></script>
+		<script type="application/javascript;version=1.7" src="scripts/index.js"></script>
 
 		<script type="application/javascript;version=1.7">
 			'use strict';
 
-			/* FIXME: Debugging the sample race. */
-			window.onload = function () {
-				let track = new RaceTrack();
+			document.addEventListener('DOMContentLoaded', () => {
+				let page = new Page();
 
-			    /* Creating two sample players. */
-
-			    let player1 = new SamplePlayer();
-			    let player2 = new SamplePlayer();
-
-			    /* Creating new race. */
-			    let race = new Race(player1, player2);
-
-			    /* Acquiring race progress and refreshing the track view. */
-			    race.on('progress', trackView => {
-			    	trackView.events.forEach(evt => {
-			    		console.log('Race event: ' + evt.type + ' ' + JSON.stringify(evt.data));
-			    	});
-			    	
-			    	let winners = trackView.events
-			    		.filter(evt => evt.type === 'winner')
-			    		.map(evt => evt.data);
-
-			    	if (winners.length) {
-			    		console.log('Winners: ' + JSON.stringify(winners));
-			    	}
-
-			    	console.log('Render track.');
-			    		
-			    	track.update(trackView.trackData);
-			    });
-
-			    race.on('start', () => { console.log('Race started.'); });
-			    race.on('stop', () => { console.log('Race stopped.'); });
-
-			    /* Starting the race. */
-			    race.start();
-			};
+				page.serve();
+			});
 		</script>
 	</body>
 </html>

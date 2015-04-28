@@ -4,28 +4,41 @@
  * Represents a race.
  */
 class Race extends EventEmitter {
-
     /**
      * Initializes a new instance of an object.
      * @param {object} player1 Player #1.
      * @param {object} player2 Player #2.
+     * @param {object} options Race options.
      */
-    constructor(player1 = null, player2 = null) {
+    constructor(player1 = null, player2 = null, options = {}) {
         this.player1 = player1;
         this.player2 = player2;
 
-        this.trackRefreshRate = 500;
+        this.trackRefreshRate = 200;
         this.obstacleDensity = 0.08;
+        this.trackDistance = 50;
 
-        this._trackEventTrace = [];
-        this._hasStarted = false;
-        this._trackProgress = 0;
-        this._trackData = null;
-        this._track = null;
+        /* By default, log to console. */
+        if (!options.log) {
+            options.log = function (message) {
+                console.log.apply(console, [message]);
+            };
+        }
+
+        this._options = options;
+        
+        this.reset();
     }
 
     /**
-     * Returns track size.
+     * Gets race options.
+     */
+    get options() {
+        return this._options;
+    }
+
+    /**
+     * Gets track size.
      */
     get trackSize() {
         return {
@@ -52,10 +65,12 @@ class Race extends EventEmitter {
      * Resets the race.
      */
     reset() {
+        this._player1Crashed = false;
+        this._player2Crashed = false;
         this._trackEventTrace = [];
+        this._hasStarted = false;
         this._trackProgress = 0;
-        this._hasStarted = true;
-        this._trackView = null;
+        this._trackData = null;
 
         this._track = {
             now: null,
@@ -65,9 +80,14 @@ class Race extends EventEmitter {
 
     /**
      * Starts the race.
+     * @param {object} player1 Player #1 (optional).
+     * @param {object} player2 Player #2 (optional).
      */
-    start() {
+    start(player1 = null, player2 = null) {
         this.reset();
+
+        if (player1) this.player1 = player1;
+        if (player2) this.player2 = player2;
 
         this._hasStarted = true;
 
@@ -76,9 +96,13 @@ class Race extends EventEmitter {
 
         this.trigger('start');
 
-        Stream.from(() => { return this.progress(); }).on('data', trackView => {
-            this.trigger('progress', trackView);
-        });
+        Stream.from(() => { return this.progress(); })
+            .on('data', trackView => {
+                this.trigger('progress', trackView);
+            })
+            .on('error', err => {
+                this.options.log('[Race] Error: ' + err.toString());
+            });
     }
 
     /**
@@ -211,11 +235,11 @@ class Race extends EventEmitter {
                     coordinates,
                     originalCoordinates;
 
-                /* Asking the player to move. */
-                move = player.move(this._track);
-
                 /* Finding the player on a track. */
                 coordinates = findPlayerCoordinates(identifier);
+
+                /* Asking the player to move. */
+                move = player.move(this._track, coordinates);
 
                 /* Is the player still on track? */
                 if (coordinates.x >= 0) {
@@ -238,6 +262,11 @@ class Race extends EventEmitter {
                     /* Changing speed. */
                     coordinates.y -= (move.speed || 1);
 
+                    /* If the player goes too fast, he can go beyond the finishing line but we want him to stay there. */
+                    if (coordinates.y < 0) {
+                        coordinates.y = 0;
+                    }
+
                     for (let i = coordinates.y; i <= originalCoordinates.y; i++) {
                         /* Checking whether the player has crashed. */
                         if (this._track.now[i][coordinates.x] !== identifier &&
@@ -259,25 +288,33 @@ class Race extends EventEmitter {
                 return crashSpot;
             };
 
-        playerCrashSpot = refreshAndCheckIfCrashed(this.player1, 'x');
+        if (!this._player1Crashed) {
+            playerCrashSpot = refreshAndCheckIfCrashed(this.player1, 'x');
 
-        /* Checking whether player 1 has crashed. */
-        if (playerCrashSpot) {
-            registerEvent('crash', {
-                player: this.player1,
-                coordinates: playerCrashSpot
-            });
+            /* Checking whether player 1 has crashed. */
+            if (playerCrashSpot) {
+                this._player1Crashed = true;
+
+                registerEvent('crash', {
+                    player: this.player1,
+                    coordinates: playerCrashSpot
+                });
+            }
         }
 
-        playerCrashSpot = refreshAndCheckIfCrashed(this.player2, 'y');
+        if (!this._player2Crashed) {
+            playerCrashSpot = refreshAndCheckIfCrashed(this.player2, 'y');
 
-        /* Checking whether player 2 has crashed. */
-        if (playerCrashSpot) {
-            registerEvent('crash', {
-                player: this.player2,
-                coordinates: playerCrashSpot
-            });
-        }              
+            /* Checking whether player 2 has crashed. */
+            if (playerCrashSpot) {
+                this._player2Crashed = true;
+
+                registerEvent('crash', {
+                    player: this.player2,
+                    coordinates: playerCrashSpot
+                });
+            } 
+        }
 
         if (hasCompletedRace('x')) {
             /* Player 1 came first. */
@@ -285,7 +322,7 @@ class Race extends EventEmitter {
         } else if (hasCompletedRace('y')) {
             /* Player 2 came first. */
             registerEvent('winner', this.player2);
-        } else if (this._trackProgress < 10) {
+        } else if (this._trackProgress < this.trackDistance) {
             this._trackProgress++;
 
             /* Refreshing the track (advancing the view). */
@@ -354,5 +391,44 @@ class Race extends EventEmitter {
                 this._track.now.unshift(nextLine());
             }
         }
+    }
+
+    /**
+     * Starts new race.
+     * @param {Player} player1 First player.
+     * @param {Player} player2 Second player.
+     * @param {object} options Race options.
+     */
+    static startNew(player1, player2, options = {}) {
+        /* Defining a track. */
+        let track = new RaceTrack();
+
+        /* Creating new race. */
+        let race = new Race(player1, player2, options);
+
+        /* Acquiring race progress and refreshing the track view. */
+        race.on('progress', trackView => {
+            trackView.events.forEach(evt => {
+                race.options.log('[Race] Event: \"' + evt.type + '\" (' + JSON.stringify(evt.data) + ')');
+            });
+            
+            let winners = trackView.events
+                .filter(evt => evt.type === 'winner')
+                .map(evt => evt.data);
+
+            if (winners.length) {
+                race.options.log('[Race] Winners: ' + JSON.stringify(winners));
+            }
+                
+            track.update(trackView.trackData);
+        });
+
+        race.on('start', () => { race.options.log('[Race] Race started.'); });
+        race.on('stop', () => { race.options.log('[Race] Race stopped.'); });
+
+        /* Starting the race. */
+        race.start();
+
+        return race;
     }
 }

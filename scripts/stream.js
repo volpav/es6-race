@@ -96,9 +96,11 @@ class Stream extends EventEmitter {
                         if (typeof (value) === 'function') {
                             generator = value();
                         } else {
-                            /* Notifying that we have data. */
-                            stream.trigger('data', value);
-
+                            if (typeof (value) !== 'undefined' && value !== null) {
+                                /* Notifying that we have data. */
+                                stream.trigger('data', value);
+                            }
+                            
                             /* Checking whether we're done with this generator. */
                             if (done) {
                                 stream.trigger('end');
@@ -124,7 +126,7 @@ class Stream extends EventEmitter {
                     result = generator.next();
 
                     /* If the value returned is a promise, awaiting for the result before processing. */
-                    if (typeof (result.value.then) === 'function') {
+                    if (result.value && typeof (result.value.then) === 'function') {
                         result.value.then(onValue, onError);
                     } else {
                         onValue(result.value, result.done);
