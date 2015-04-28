@@ -22,8 +22,8 @@ class RaceTrack {
   update(matrix) {
     var self = this;
 
-    matrix.forEach(function(trackRow, i) {
-      trackRow.forEach(function(trackCol, j) {
+    matrix.forEach((trackRow, i) => {
+      trackRow.forEach((trackCol, j) => {
         let currTrackCol = document.querySelectorAll('.track-row-' + (i + 1) + ' > .track-col-' + (j + 1))[0];
 
         self._resetTrackCol(currTrackCol);
@@ -35,7 +35,7 @@ class RaceTrack {
 
   _resetTrackCol(col) {
     ['icon-shield', 'icon-cool', 'icon-evil']
-    .forEach(function(className) {
+    .forEach((className) => {
       if (col.classList)
         col.classList.remove(className);
       else
