@@ -1,17 +1,60 @@
 html {
   box-sizing: border-box;
 }
+
+body {
+  background: url(../images/real_cf.png) repeat;
+  font-family: 'Roboto', sans-serif;
+}
+
 *, *:before, *:after {
   box-sizing: inherit;
 }
 
 h1 {
+  padding-bottom: 20px;
   font-size: 2em;
+  font-weight: 100;
+  color: #FFF305;
+  text-align: center;
+}
+
+.container {
+  width: 75%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: rgba(0,0,0,0.3);
 }
 
 .race-track {
-  margin: 15px auto 0 auto;
+  display: inline-block;
+  vertical-align: top;
   width: 200px;
+}
+
+.test-player {
+  display: inline-block;
+  vertical-align: top;
+  width: 325px;
+  margin-left: 15px;
+}
+
+.test-player > .CodeMirror {
+  height: 343px;
+}
+
+.player-test-button {
+  display: block;
+  float: right;
+  background-color: #C8E6C9;
+  border: 2px solid #4CAF50;
+  padding: 10px 25px;
+  cursor: pointer;
+  margin-top: 15px;
+  font-size: 0.8em;
+  font-weight: 300;
+  color: #388E3C;
+  text-transform: uppercase;
 }
 
 .track-row {

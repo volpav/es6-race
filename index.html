@@ -5,16 +5,22 @@
 		<link rel="stylesheet" href="css/reset.css" />
 		<link rel="stylesheet" href="css/fonts.css" />
 		<link rel="stylesheet" href="css/main.css" />
+		<link rel="stylesheet" href="css/codemirror.css">
+		<link href='http://fonts.googleapis.com/css?family=Roboto:400,300,100,300italic,400italic,700italic' rel='stylesheet' type='text/css'>
 	</head>
 
 	<body>
 		<div class="container">
-			<h1>ES6 Race</h1>
+			<h1>ECMAScript 6 Race</h1>
 			<div id="race-track" class="race-track"></div>
+			<div class="test-player">
+				<textarea id="player-test-source" class="player-test-source"></textarea>
+				<button id="player-test-button" class="player-test-button">Test player</button>
+			</div>
 		</div>
 
-		<textarea id="player-test-source"></textarea>
-		<button id="player-test-button">Test player</button>
+		<script type="text/javascript" src="scripts/vendor/codemirror.js"></script>
+		<script type="text/javascript" src="scripts/vendor/javascript.js"></script>
 
 		<script type="application/javascript;version=1.7" src="scripts/stream.js"></script>
 		<script type="application/javascript;version=1.7" src="scripts/loader.js"></script>
@@ -31,6 +37,10 @@
 				let page = new Page();
 
 				page.serve();
+			});
+
+			var myCodeMirror = CodeMirror.fromTextArea(document.getElementById('player-test-source'), {
+				mode: 'javascript'
 			});
 		</script>
 	</body>
