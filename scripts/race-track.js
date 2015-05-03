@@ -31,10 +31,12 @@ class RaceTrack {
         self._updateTrackCol(currTrackCol, trackCol);
       });
     });
+
+    self._toggleClass(document.querySelectorAll('#race-track')[0], 'move');
   }
 
   _resetTrackCol(col) {
-    ['icon-shield', 'icon-cool', 'icon-evil']
+    ['obstacle', 'car-blue', 'car-red']
     .forEach((className) => {
       if (col.classList)
         col.classList.remove(className);
@@ -48,13 +50,13 @@ class RaceTrack {
 
     switch (val) {
       case '*':
-        className = 'icon-shield';
+        className = 'obstacle';
         break;
       case 'x':
-        className = 'icon-cool';
+        className = 'car-blue';
         break;
       case 'y':
-        className = 'icon-evil';
+        className = 'car-red';
         break;
     }
 
@@ -66,5 +68,21 @@ class RaceTrack {
       col.classList.add(className);
     else
       col.className += ' ' + className;
+  }
+
+  _toggleClass(el, className) {
+    if (el.classList) {
+      el.classList.toggle(className);
+    } else {
+      var classes = el.className.split(' ');
+      var existingIndex = classes.indexOf(className);
+
+      if (existingIndex >= 0)
+        classes.splice(existingIndex, 1);
+      else
+        classes.push(className);
+
+      el.className = classes.join(' ');
+    }
   }
 }

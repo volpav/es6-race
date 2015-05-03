@@ -61,24 +61,39 @@ h1 {
   overflow: hidden;
 }
 
-.track-row:nth-child(odd) > .track-col:nth-child(odd) {
-  background-color: #e6e6e6;
+.race-track.move > .track-row:nth-child(odd) > .track-col:nth-child(odd) {
+  border-right: 1px solid #C0C0C0;
 }
 
-.track-row:nth-child(odd) > .track-col:nth-child(even) {
-  background-color: #f2f2f2;
+.race-track.move > .track-row:nth-child(even) > .track-col:nth-child(even) {
+  border-right: 1px solid #C0C0C0;
 }
 
-.track-row:nth-child(even) > .track-col:nth-child(odd) {
-  background-color: #f2f2f2;
+.race-track:not(.move) > .track-row:nth-child(even) > .track-col:nth-child(odd) {
+  border-right: 1px solid #C0C0C0;
 }
 
-.track-row:nth-child(even) > .track-col:nth-child(even) {
-  background-color: #e6e6e6;
+.race-track:not(.move) > .track-row:nth-child(odd) > .track-col:nth-child(even) {
+  border-right: 1px solid #C0C0C0;
 }
 
 .track-col {
   float: left;
   width: 20px;
   height: 20px;
+  background-color: #282B2A;
+}
+
+.obstacle {
+  background-image: url(../images/wall_silver.png);
+}
+
+.car-blue {
+  background-image: url(../images/car_sprite_scale.png);
+  background-position: 0 0;
+}
+
+.car-red {
+  background-image: url(../images/car_sprite_scale.png);
+  background-position: 20px 0;
 }
