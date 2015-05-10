@@ -20,7 +20,7 @@ class SamplePlayer extends Player {
     /**
      * Returns player's move.
      * @param {object} track A track sight for the given player.
-     * @param {object} me A structure with "x" and "y" fields representing current player coordinates.
+     * @param {object} me A structure with "x", "y" and "speed" fields representing current player coordinates and speed.
      */
     move (track, me) {
         let decision = {
