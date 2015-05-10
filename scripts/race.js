@@ -25,16 +25,9 @@ class Race extends EventEmitter {
             };
         }
 
-        this._options = options;
-        
-        this.reset();
-    }
+        this.options = options;
 
-    /**
-     * Gets race options.
-     */
-    get options() {
-        return this._options;
+        this.reset();
     }
 
     /**
@@ -76,6 +69,11 @@ class Race extends EventEmitter {
             now: null,
             before: []
         };
+
+        this._currentSpeed = {
+            x: 1,
+            y: 1
+        };
     }
 
     /**
@@ -89,20 +87,25 @@ class Race extends EventEmitter {
         if (player1) this.player1 = player1;
         if (player2) this.player2 = player2;
 
-        this._hasStarted = true;
+        if (this.player1 && this.player2) {
+            this._hasStarted = true;
 
-        /* Generating track data. */
-        this.refreshTrackData();
+            /* Generating track data. */
+            this.refreshTrackData();
 
-        this.trigger('start');
+            this.trigger('start');
 
-        Stream.from(() => { return this.progress(); })
-            .on('data', trackView => {
-                this.trigger('progress', trackView);
-            })
-            .on('error', err => {
-                this.options.log('[Race] Error: ' + err.toString());
-            });
+            Stream.from(() => { return this.progress(); })
+                .on('data', trackView => {
+                    this.trigger('progress', trackView);
+                })
+                .on('error', err => {
+                    this.options.log('[Race] Error: ' + err.toString());
+                });
+        } else {
+            /* Stopping, need two players to compete. */
+            this.stop();
+        }
     }
 
     /**
@@ -239,7 +242,15 @@ class Race extends EventEmitter {
                 coordinates = findPlayerCoordinates(identifier);
 
                 /* Asking the player to move. */
-                move = player.move(this._track, coordinates);
+                move = player.move({
+                    now: this._track.now,
+                    before: this._track.before,
+                    size: this.trackSize
+                }, {
+                    x: coordinates.x,
+                    y: coordinates.y,
+                    speed: this._currentSpeed[identifier]
+                });
 
                 /* Is the player still on track? */
                 if (coordinates.x >= 0) {
@@ -253,14 +264,17 @@ class Race extends EventEmitter {
                         coordinates.x += 1;
                     }
 
-                    if (move.speed > 3) {
-                        move.speed = 3;
-                    } else if (move.speed < 1) {
-                        move.speed = 1;
+                    /* Changing current speed. */
+                    this._currentSpeed[identifier] += (move.acceleration > 0 ? 1 : (move.acceleration < 0 ? -1 : 0));
+
+                    if (this._currentSpeed[identifier] > 3) {
+                        this._currentSpeed[identifier] = 3;
+                    } else if (this._currentSpeed[identifier] < 1) {
+                        this._currentSpeed[identifier] = 1;
                     }
 
-                    /* Changing speed. */
-                    coordinates.y -= (move.speed || 1);
+                    /* Applying speed. */
+                    coordinates.y -= (this._currentSpeed[identifier] || 1);
 
                     /* If the player goes too fast, he can go beyond the finishing line but we want him to stay there. */
                     if (coordinates.y < 0) {
@@ -412,14 +426,6 @@ class Race extends EventEmitter {
                 race.options.log('[Race] Event: \"' + evt.type + '\" (' + JSON.stringify(evt.data) + ')');
             });
             
-            let winners = trackView.events
-                .filter(evt => evt.type === 'winner')
-                .map(evt => evt.data);
-
-            if (winners.length) {
-                race.options.log('[Race] Winners: ' + JSON.stringify(winners));
-            }
-                
             track.update(trackView.trackData);
         });
 

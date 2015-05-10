@@ -68,7 +68,7 @@ class TournamentAgenda {
 					}, nextQueueItem);
 				} else {
 					/* Player count must be even. */
-					if (loadedPlayers > 0 && loadedPlayers % 2 !== 0) {
+					if (loadedPlayers.length > 0 && loadedPlayers.length % 2 !== 0) {
 						loadedPlayers.push(new SamplePlayer());
 					}
 
@@ -100,6 +100,7 @@ class Tournament extends EventEmitter {
 		this._players = [];
 		this._currentRound = [];
 		this._nextRound = [];
+		this._race = null;
 
 		/* By default, log to console. */
         if (!options.log) {
@@ -133,9 +134,13 @@ class Tournament extends EventEmitter {
 	}
 
 	/** 
-	 * Cancels the tournament.
+	 * Stops the tournament.
 	 */
-	cancel() {
+	stop() {
+		if (this._race) {
+			this._race.stop();
+		}
+
 		this._players = [];
 		this._currentRound = [];
 		this._nextRound = [];
@@ -145,8 +150,8 @@ class Tournament extends EventEmitter {
 	 * Starts the tournament.
 	 */
 	start() {
-		/* Fist of all, cancelling the currently running tournament. */
-		this.cancel();
+		/* Fist of all, stopping the currently running tournament. */
+		this.stop();
 
 		/* Triggering the initial event - starting the tournament. */
 		this.trigger('start');
@@ -170,64 +175,75 @@ class Tournament extends EventEmitter {
 	 * Starts the next round.
 	 */
 	nextRound() {
-		let currentRoundQueue = [],
+		let ret = null,
+			currentRoundQueue = [],
 			currentRoundNextQueueItem = null;
 
-		/* Notifying about the next round. */
-		this.trigger('nextRound');
+		this._currentRound = [];
+
+		/* Adding players for the current round. */
+		if (this._nextRound.length) {
+			this._nextRound.forEach(player => {
+				this._currentRound.push(player);
+			});
+		} else if (this._players.length) {
+			this._players.forEach(player => {
+				this._currentRound.push(player);
+			});
+		}
 
 		/* Reseting the players for the next round. */
 		this._nextRound = [];
 
-		/* Making pairs. */
-		for (let i = 0; i < this._currentRound.length / 2; i++) {
-			currentRoundQueue.push({
-				player1: this._currentRound[i],
-				player2: this._currentRound[this._currentRound.length - i - 1]
-			});
-		}
-
-		/* Processes the race between the next available pair. */
-		currentRoundNextQueueItem = () => {
-			let result = null,
-				pair = currentRoundQueue.splice(0, 1)[0];
-
-			if (pair) {
-				/* Running next pair. */
-				result = this.nextPair(pair.player1, pair.player2);
-			} else {
-				this._currentRound = [];
-
-				/* Creating new round. */
-				this._nextRound.forEach(winner => {
-					this._currentRound.push(winner);
+		/* Do we have anyone competing in this round? */
+		if (this._currentRound.length > 1 && this._currentRound.filter(player => player !== null).length > 0) {
+			/* Making pairs. */
+			for (let i = 0; i < this._currentRound.length / 2; i++) {
+				currentRoundQueue.push({
+					player1: this._currentRound[i],
+					player2: this._currentRound[this._currentRound.length - i - 1]
 				});
+			}
 
-				/* End of tournament. */
-				if (this._nextRound.length === 1) {
-					this.trigger('end', {
-						winner: this._nextRound[0]
+			/* Notifying about the next round. */
+			this.trigger('nextRound', {
+				pairs: currentRoundQueue
+			});
+
+			/* Processes the race between the next available pair. */
+			currentRoundNextQueueItem = () => {
+				let result = null,
+					pair = currentRoundQueue.splice(0, 1)[0];
+
+				if (pair) {
+					/* Running next pair. */
+					result = this.nextPair(pair.player1, pair.player2);
+				} else {
+					/* End of round. */
+					result = new Promise((pairResolve) => {
+						pairResolve('end');
 					});
 				}
 
-				/* End of round. */
-				result = new Promise((pairResolve) => {
-					pairResolve('end');
-				});
-			}
+				return result;
+			};
 
-			return result;
-		};
+			/* Returning an object which allows controlling the round (running races). */
+			ret = {
+				/**
+				 * Runs the next race.
+				 */
+				nextPair: () => {
+					return currentRoundNextQueueItem();		
+				}
+			};
+		} else {
+			this.trigger('end', {
+				winner: this._currentRound[0]
+			});
+		}
 
-		/* Returning an object which allows controlling the round (running races). */
-		return {
-			/**
-			 * Runs the next race.
-			 */
-			nextPair: () => {
-				return currentRoundNextQueueItem();		
-			}
-		};
+		return ret;
 	}
 
 	/**
@@ -237,7 +253,8 @@ class Tournament extends EventEmitter {
 	 */
 	nextPair(player1, player2) {
 		return new Promise((resolve, reject) => {
-			let race = Race.startNew(player1, player2);
+			let race = Race.startNew(player1, player2),
+				hadWinner = false;
 
 			race.on('progress', trackView => {
 				let winners = trackView.events
@@ -245,13 +262,31 @@ class Tournament extends EventEmitter {
                 	.map(evt => evt.data);
 
                 /* We have a winner. */
-            	if (winners.length) {
+            	if (winners.length && !hadWinner) {
+            		hadWinner = true;
+
             		this._nextRound.push(winners[0]);
+
+            		/* Notifying about the pair winner. */
+            		this.trigger('nextPairWinner', {
+            			player1: player1,
+						player2: player2,
+						winner: winners[0]
+            		});
             	}
 			});
 
 			/* Returning from the race. */
-			race.on('stop', resolve);
+			race.on('stop', () => {
+				/* There was no winner - pairing player from previous round continue without competing in immediate one. */
+				if (!hadWinner) {
+					hadWinner = true;
+
+					this._nextRound.push(null);
+				}
+
+				resolve();
+			});
 
 			/* Notifying about the next pair. */
 			this.trigger('nextPair', {
@@ -260,6 +295,9 @@ class Tournament extends EventEmitter {
 			});
 
 			race.start();
+
+			/* Keeping track of the current race. */
+			this._race = race;
 		});
 	}
 
@@ -269,7 +307,15 @@ class Tournament extends EventEmitter {
 	 */
 	static startNew(players) {
 		let tournament = new Tournament(),
-			isEndOfTournament = false;
+			isFirstPair = true,
+
+			/**
+			 * Describes the name of this player.
+			 * @param {object} p Player.
+			 */
+			describeName = p => {
+				return p ? p.name : '[none]';
+			};
 
 		/**
 		 * Runs next round while there's on available (while there's no winner).
@@ -281,26 +327,29 @@ class Tournament extends EventEmitter {
 				 * Runs a competition between two players while the current round is not over.
 				 */
 				nextPairWhileNotEnd = () => {
-					round.nextPair().then(result => {
-						if (result === 'end') {
-							if (!isEndOfTournament) {
-								/* Starting next round. */
+					setTimeout(function () {
+						isFirstPair = false;
+
+						round.nextPair().then(result => {
+							if (result === 'end') {
 								nextRoundWhileNotEnd();
+							} else {
+								nextPairWhileNotEnd();
 							}
-						} else {
-							nextPairWhileNotEnd();
-						}
-					});
+						});
+						
+					}, isFirstPair ? 0 : 3000);
 				};
 
+			if (round) {
 				nextPairWhileNotEnd();
+			}
 		};
 
 		/* Adding players to the tournament agenda. */
 		players.forEach(player => {
 			tournament.agenda.addPlayer(player);
 		});
-
 
 		tournament.on('start', () => {
 			tournament.options.log('[Tournament] Start.');
@@ -311,18 +360,16 @@ class Tournament extends EventEmitter {
 			nextRoundWhileNotEnd();
 		});
 
-		tournament.on('nextRound', () => {
-			tournament.options.log('[Tournament] Next round.');
+		tournament.on('nextRound', e => {
+			tournament.options.log('[Tournament] Next round (' + JSON.stringify(e.pairs.map(pair => describeName(pair.player1) + ' and ' + describeName(pair.player2))) + ').');
 		});
 
 		tournament.on('nextPair', e => {
-			tournament.options.log('[Tournament] Next race (' + e.player1.name + ' and ' + e.player2.name + ').');
+			tournament.options.log('[Tournament] Next race (' + describeName(e.player1) + ' and ' + describeName(e.player2) + ').');
 		});
 
-		tournament.on('end', () => {
-			tournament.options.log('[Tournament] End.');
-
-			isEndOfTournament = true;
+		tournament.on('end', e => {
+			tournament.options.log('[Tournament] End. Winner: ' + describeName(e.winner));
 		});
 
 		/* Starting the tournament. */

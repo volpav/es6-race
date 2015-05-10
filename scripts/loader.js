@@ -22,6 +22,11 @@ class ScriptLoader {
 				url += '.js';
 			}
 
+			/* Making sure we are loading from "/scripts" folder. */
+			if (url.toLowerCase().indexOf('scripts/') !== 0) {
+				url = 'scripts' + (url.indexOf('/') === 0 ? '' : '/') + url;
+			} 
+
 			/* We will load scripts via AJAX. */
 			xhr = new XMLHttpRequest();
 

@@ -1,19 +1,20 @@
 /**
  * Represents a main page of the application.
  */
-class Page extends EventEmitter {
+class Page {
 	/**
      * Initializes a new instance of an object.
      */
 	constructor() {
 		this._race = null;
+		this._tournament = null;
 	}
 
 	/**
 	 * Serves the page.
 	 */
 	serve() {
-		/* FIXME: Debugging the sample race. */
+		/* FIXME: Debugging sample race. */
 		this.newRace(new SamplePlayer(), new SamplePlayer());
 
 		/* When user updates the source code of the test player and presses "Test player" button... */
@@ -26,6 +27,10 @@ class Page extends EventEmitter {
 			}
 			
 		});
+
+		document.getElementById('tournament-start').addEventListener('click', () => {
+			this.newTournament();
+		});
 	}
 
 	/**
@@ -34,14 +39,41 @@ class Page extends EventEmitter {
      * @param {object} player2 Player #2.
 	 */
 	newRace(player1 = null, player2 = null) {
+		/* (race mode) Stopping current race, if running. */
 		if (this._race) {
 			this._race.stop();
 		}
 
+		/* (tournament mode) stopping current tournament, if running. */
+		if (this._tournament) {
+			this._tournament.stop();
+		}
+
 		/* Starting new race. */
 		this._race = Race.startNew(player1, player2);
+	}
 
-		/* Making race object available to the outside. */
-		this.trigger('newRace', { race: this._race });
+	/**
+	 * Starts new tournament.
+	 */
+	newTournament() {
+		let players = [
+			'players/sample-player',
+			'players/sample-player',
+			'players/sample-player'
+		];
+
+		/* (tournament mode) stopping current tournament, if running. */
+		if (this._tournament) {
+			this._tournament.stop();
+		}
+
+		/* (race mode) Stopping current race, if running. */
+		if (this._race) {
+			this._race.stop();
+		}
+
+		/* Starting new tournament. */
+		this._tournament = Tournament.startNew(players);
 	}
 }
