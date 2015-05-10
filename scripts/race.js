@@ -407,6 +407,24 @@ class Race extends EventEmitter {
         }
     }
 
+    refreshUI(evt) {
+        let message = '';
+
+        switch (evt.type) {
+            case 'crash':
+                message = evt.data.player._name + ' crashed at ' + evt.data.coordinates.x + ':' + evt.data.coordinates.y + '.';
+                break;
+            case 'winner':
+                message = evt.data._name + ' has WON the race!';
+                break;
+            default:
+                message = evt.data;
+                break;
+        }
+
+        document.querySelectorAll('#race-dashboard > .notification')[0].innerHTML = message;
+    }
+
     /**
      * Starts new race.
      * @param {Player} player1 First player.
@@ -424,13 +442,18 @@ class Race extends EventEmitter {
         race.on('progress', trackView => {
             trackView.events.forEach(evt => {
                 race.options.log('[Race] Event: \"' + evt.type + '\" (' + JSON.stringify(evt.data) + ')');
+                race.refreshUI(evt);
             });
             
             track.update(trackView.trackData);
         });
 
-        race.on('start', () => { race.options.log('[Race] Race started.'); });
-        race.on('stop', () => { race.options.log('[Race] Race stopped.'); });
+        race.on('start', () => { 
+            race.options.log('[Race] Race started.'); 
+        });
+        race.on('stop', () => { 
+            race.options.log('[Race] Race stopped.');
+        });
 
         /* Starting the race. */
         race.start();

@@ -17,9 +17,13 @@ class Page {
 		/* FIXME: Debugging sample race. */
 		this.newRace(new SamplePlayer(), new SamplePlayer());
 
+		var testSource = CodeMirror.fromTextArea(document.getElementById('player-test-source'), {
+			mode: 'javascript'
+		});
+
 		/* When user updates the source code of the test player and presses "Test player" button... */
 		document.getElementById('player-test-button').addEventListener('click', () => {
-			var source = document.getElementById('player-test-source').value;
+			var source = testSource.getValue();
 
 			if (source && source.length) {
 				/* Restarting it with the first player copiled from the user's provided source code. */
@@ -28,7 +32,7 @@ class Page {
 			
 		});
 
-		document.getElementById('tournament-start').addEventListener('click', () => {
+		document.getElementById('tournament-start-button').addEventListener('click', () => {
 			this.newTournament();
 		});
 	}

@@ -26,6 +26,41 @@ h1 {
   background-color: rgba(0,0,0,0.3);
 }
 
+.race-dashboard {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  margin-top: 15px;
+  background-color: rgba(255,255,255,0.25);
+  box-shadow: inset  0  8px 8px -8px #000, 
+              inset  0 -8px 8px -8px #000;
+}
+
+.race-dashboard::before {
+  position: absolute;
+  display: block;
+  width: 100%;
+  height: 25px;
+  top: -25px;
+  padding-top: 5px;
+  background-color: rgba(255,255,255,0.5);
+  border-top-left-radius: 50px;
+  border-top-right-radius: 50px;
+  content: 'Dashboard';
+  text-align: center;
+  color: #F5F5F5;
+  font-weight: 100;
+}
+
+.race-dashboard > .notification {
+  padding: 15px;
+  display: block;
+  font-size: 1.25em;
+  color: rgb(255, 152, 0);
+  font-style: italic;
+  font-weight: 300;
+}
+
 .race-track {
   display: inline-block;
   vertical-align: top;
@@ -41,6 +76,7 @@ h1 {
 
 .test-player > .CodeMirror {
   height: 343px;
+  font-size: 11px;
 }
 
 .player-test-button {
@@ -48,12 +84,27 @@ h1 {
   float: right;
   background-color: #C8E6C9;
   border: 2px solid #4CAF50;
-  padding: 10px 25px;
+  padding: 10px 20px;
   cursor: pointer;
   margin-top: 15px;
   font-size: 0.8em;
   font-weight: 300;
   color: #388E3C;
+  text-transform: uppercase;
+}
+
+.tournament-start-button {
+  display: block;
+  float: right;
+  background-color: #FFE0B2;
+  border: 2px solid #FF9800;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-top: 15px;
+  margin-right: 15px;
+  font-size: 0.8em;
+  font-weight: 300;
+  color: #F57C00;
   text-transform: uppercase;
 }
 

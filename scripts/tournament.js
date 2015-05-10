@@ -301,6 +301,10 @@ class Tournament extends EventEmitter {
 		});
 	}
 
+	refreshUI(message) {
+      document.querySelectorAll('#race-dashboard > .notification')[0].innerHTML = message;
+  }
+
 	/**
 	 * Starts a new tournament.
 	 * @param {Array} players Players.
@@ -352,7 +356,9 @@ class Tournament extends EventEmitter {
 		});
 
 		tournament.on('start', () => {
-			tournament.options.log('[Tournament] Start.');
+			let message = '[Tournament] Start.';
+			tournament.options.log(message);
+			tournament.refreshUI(message);
 		});
 
 		tournament.on('ready', () => {
@@ -361,15 +367,21 @@ class Tournament extends EventEmitter {
 		});
 
 		tournament.on('nextRound', e => {
-			tournament.options.log('[Tournament] Next round (' + JSON.stringify(e.pairs.map(pair => describeName(pair.player1) + ' and ' + describeName(pair.player2))) + ').');
+			let message = '[Tournament] Next round (' + JSON.stringify(e.pairs.map(pair => describeName(pair.player1) + ' and ' + describeName(pair.player2))) + ').';
+			tournament.options.log(message);
+			tournament.refreshUI(message);
 		});
 
 		tournament.on('nextPair', e => {
-			tournament.options.log('[Tournament] Next race (' + describeName(e.player1) + ' and ' + describeName(e.player2) + ').');
+			let message = '[Tournament] Next race (' + describeName(e.player1) + ' and ' + describeName(e.player2) + ').';
+			tournament.options.log(message);
+			tournament.refreshUI(message);
 		});
 
 		tournament.on('end', e => {
-			tournament.options.log('[Tournament] End. Winner: ' + describeName(e.winner));
+			let message = '[Tournament] End. Winner: ' + describeName(e.winner)
+			tournament.options.log(message);
+			tournament.refreshUI(message);
 		});
 
 		/* Starting the tournament. */
