@@ -301,8 +301,26 @@ class Tournament extends EventEmitter {
 		});
 	}
 
-	refreshUI(message) {
+	updateUI(message) {
       document.querySelectorAll('#race-dashboard > .notification')[0].innerHTML = message;
+  }
+
+  updatePlayers(evt) {
+  	let playersHtml = '', 
+		  	describeName = p => {
+					return p ? p.name : '[none]';
+				};
+
+		playersHtml = '<div class="player player-1">' +
+									'  <span class="car car-blue"></span>' +
+									'  <span class="name">' + describeName(evt.player1) + '</span>' +
+									'</div>' +
+									'<div class="player player-2">' +
+									'  <span class="car car-red"></span>' +
+									'  <span class="name">' + describeName(evt.player2) + '</span>' +
+									'</div>';
+
+		document.querySelectorAll('#players-container')[0].innerHTML = playersHtml;
   }
 
 	/**
@@ -358,7 +376,7 @@ class Tournament extends EventEmitter {
 		tournament.on('start', () => {
 			let message = '[Tournament] Start.';
 			tournament.options.log(message);
-			tournament.refreshUI(message);
+			tournament.updateUI(message);
 		});
 
 		tournament.on('ready', () => {
@@ -369,19 +387,20 @@ class Tournament extends EventEmitter {
 		tournament.on('nextRound', e => {
 			let message = '[Tournament] Next round (' + JSON.stringify(e.pairs.map(pair => describeName(pair.player1) + ' and ' + describeName(pair.player2))) + ').';
 			tournament.options.log(message);
-			tournament.refreshUI(message);
+			tournament.updateUI(message);
 		});
 
 		tournament.on('nextPair', e => {
 			let message = '[Tournament] Next race (' + describeName(e.player1) + ' and ' + describeName(e.player2) + ').';
 			tournament.options.log(message);
-			tournament.refreshUI(message);
+			tournament.updateUI(message);
+			tournament.updatePlayers(e);
 		});
 
 		tournament.on('end', e => {
 			let message = '[Tournament] End. Winner: ' + describeName(e.winner)
 			tournament.options.log(message);
-			tournament.refreshUI(message);
+			tournament.updateUI(message);
 		});
 
 		/* Starting the tournament. */

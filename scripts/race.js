@@ -407,7 +407,7 @@ class Race extends EventEmitter {
         }
     }
 
-    refreshUI(evt) {
+    updateUI(evt) {
         let message = '';
 
         switch (evt.type) {
@@ -442,7 +442,7 @@ class Race extends EventEmitter {
         race.on('progress', trackView => {
             trackView.events.forEach(evt => {
                 race.options.log('[Race] Event: \"' + evt.type + '\" (' + JSON.stringify(evt.data) + ')');
-                race.refreshUI(evt);
+                race.updateUI(evt);
             });
             
             track.update(trackView.trackData);

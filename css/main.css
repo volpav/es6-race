@@ -31,7 +31,7 @@ h1 {
   width: 100%;
   height: 50px;
   margin-top: 15px;
-  background-color: rgba(255,255,255,0.25);
+  background-color: rgba(255,255,255,0.15);
   box-shadow: inset  0  8px 8px -8px #000, 
               inset  0 -8px 8px -8px #000;
 }
@@ -43,7 +43,7 @@ h1 {
   height: 25px;
   top: -25px;
   padding-top: 5px;
-  background-color: rgba(255,255,255,0.5);
+  background-color: rgba(255,255,255,0.25);
   border-top-left-radius: 50px;
   border-top-right-radius: 50px;
   content: 'Dashboard';
@@ -147,4 +147,29 @@ h1 {
 .car-red {
   background-image: url(../images/car_sprite_scale.png);
   background-position: 20px 0;
+}
+
+.players-container {
+  margin-top: 15px;
+}
+
+.players-container .player {
+  display: inline-block;
+}
+
+.players-container .player-2 {
+  margin-left: 25px;
+}
+
+.players-container .car {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+}
+
+.players-container .name {
+  vertical-align: text-top;
+  font-size: 14px;
+  font-weight: 300;
+  color: rgb(245, 245, 245);
 }
