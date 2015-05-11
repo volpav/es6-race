@@ -74,6 +74,7 @@ class SamplePlayer extends Player {
 		}
 		
         if (me.y >= 2 && track.now[me.y - 2][me.x] !== ' ') {
+		    decision.acceleration = -1;
 			if(me.x == 0)
 			{
 				decision.turn = 1;
