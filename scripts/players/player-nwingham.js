@@ -14,7 +14,7 @@ class NiallPlayer extends Player {
      * Initializes a new instance of an object.
      */
     constructor() {
-        this._name = 'player-' + (Math.floor(Math.random() * 100));
+        this._name = 'player-nwingham');
     }
 
     /**
