@@ -34,7 +34,7 @@ class SamplePlayer extends Player {
              * Describes change of speed. "-1" means slow down, "1" means speed-up,
              * "0" means keep the current speed. Minimum speed is 1, maxium - 3.
              */
-            acceleration: 0
+            acceleration: 3
         };
 
         /* ----------------------------- Argument: me ------------------------------
@@ -62,7 +62,7 @@ class SamplePlayer extends Player {
 
         /* Avoiding obstacles by always turning left (and only right when we can't turn left anymore). */
         if (me.y >= 2 && track.now[me.y - 2][me.x] !== ' ') {
-            decision.turn = me.x > 0 ? -1 : 1;
+            decision.turn = 1;
         }
 
         return decision;
