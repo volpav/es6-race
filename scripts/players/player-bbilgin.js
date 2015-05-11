@@ -69,7 +69,7 @@ class SamplePlayer extends Player {
                 
         //decision.turn = me.x > 0 ? -1 : 1;
 
-        if (me.y >= 2 && track.now[me.y - 1][me.x] !== ' ') {
+        if (me.y >= 2 && track.now[me.y - 1][me.x] !== ' ') { 
           decision.turn = 1;                  
         }
 
