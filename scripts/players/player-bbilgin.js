@@ -18,6 +18,10 @@ class SamplePlayer extends Player {
         this._name = 'player-' + (Math.floor(Math.random() * 100));
     }
     
+    getAhead(track, me){
+      
+      return track.now[me.y - 2][me.x];
+    }
     /**
      * Returns player's move.
      * @param {object} track A track sight for the given player.
@@ -62,10 +66,18 @@ class SamplePlayer extends Player {
           -----------------------------------------------------------------------------
 
         /* Avoiding obstacles by always turning left (and only right when we can't turn left anymore). */
-        if (me.y >= 2 && track.now[me.y - 2][me.x] !== ' ') {
-            decision.turn = me.x > 0 ? -1 : 1;
+                
+        //decision.turn = me.x > 0 ? -1 : 1;
+
+        if (me.y >= 2 && track.now[me.y - 1][me.x] !== ' ') {
+          decision.turn = 1;                  
         }
 
+        else if (me.y >= 2 && track.now[me.y - 2][me.x] !== ' ') {
+          decision.turn = me.x > 0 ? -1 : 1;                  
+        }
+
+        decision.acceleration = 1;
         return decision;
     }
 }
